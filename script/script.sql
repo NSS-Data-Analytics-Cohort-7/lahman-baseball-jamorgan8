@@ -67,7 +67,7 @@ GROUP BY position;
 WITH homeruns AS (
                     SELECT
                         yearid,
-                        ROUND(CAST(SUM(hr) AS DECIMAL)/CAST(SUM(g) AS DECIMAL),2) AS avg_homeruns
+                        CAST(SUM(hr) AS DECIMAL)/CAST(SUM(g) AS DECIMAL) AS avg_homeruns
                     FROM teams
                     GROUP BY yearid
                   )
@@ -75,8 +75,8 @@ WITH homeruns AS (
 SELECT
     CASE WHEN sq.decade = 2010 THEN CONCAT(sq.decade, '-', sq.decade+6)
         ELSE CONCAT(sq.decade, '-', sq.decade+9) END AS decade,
-    ROUND(AVG(avg_strikeouts), 2) AS avg_strikeouts,
-    AVG(avg_homeruns) AS avg_homeruns
+    ROUND(AVG(avg_strikeouts),2) AS avg_strikeouts,
+    ROUND(AVG(avg_homeruns),2) AS avg_homeruns
 FROM(
         SELECT
             CAST(SUM(so) AS DECIMAL)/CAST(SUM(g) AS DECIMAL) AS avg_strikeouts,
@@ -94,5 +94,16 @@ ORDER BY decade;
 /*to find avg strikeouts I divided sum of strikeouts by sum of games. In teams table, strikeouts and games are represented per team. I totaled ALL strikeouts and divided by ALL games to get the average per decade
 
 For homeruns i created a CTE that is functionally the same as the subquery.*/
-                  
+     
+SELECT
+    CASE WHEN (yearid/10)*10 = 2010 THEN CONCAT((yearid/10)*10, '-', ((yearid/10)*10)+6)
+        ELSE CONCAT((yearid/10)*10, '-', ((yearid/10)*10)+9) END AS decade,
+    ROUND(CAST(SUM(so) AS DECIMAL)/CAST(SUM(g) AS DECIMAL), 2) AS avg_strikeouts,
+    ROUND(CAST(SUM(hr) AS DECIMAL)/CAST(SUM(g) AS DECIMAL), 2) AS avg_homeruns
+FROM teams
+WHERE ((yearid/10)*10) >= 1920
+GROUP BY decade
+ORDER BY decade;
+
+--then i realized I could have done it all in one streamlined query...
 
