@@ -64,24 +64,35 @@ GROUP BY position;
    
 --5. Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any 
 --trends?
-
+WITH homeruns AS (
+                    SELECT
+                        yearid,
+                        ROUND(CAST(SUM(hr) AS DECIMAL)/CAST(SUM(g) AS DECIMAL),2) AS avg_homeruns
+                    FROM teams
+                    GROUP BY yearid
+                  )
+            
 SELECT
     CASE WHEN sq.decade = 2010 THEN CONCAT(sq.decade, '-', sq.decade+6)
         ELSE CONCAT(sq.decade, '-', sq.decade+9) END AS decade,
-    ROUND(AVG(avg_strikeouts), 2) AS avg_strikeouts
+    ROUND(AVG(avg_strikeouts), 2) AS avg_strikeouts,
+    AVG(avg_homeruns) AS avg_homeruns
 FROM(
         SELECT
             CAST(SUM(so) AS DECIMAL)/CAST(SUM(g) AS DECIMAL) AS avg_strikeouts,
             (yearid/10)*10 AS decade,
-            g/2 AS num_games,
-            COUNT(teamid) AS team
-        FROM teams
+            yearid
+         FROM teams
         WHERE ((yearid/10)*10) >= 1920
-        GROUP BY decade, num_games
-    ) AS sq
+        GROUP BY decade, yearid
+        ) AS sq
+JOIN homeruns AS h
+    ON sq.yearid = h.yearid
 GROUP BY decade
 ORDER BY decade;
 
-/*to find avg strikeouts I divided sum of strikeouts by sum of games. In teams table, strikeouts and games are represented per team. I totaled ALL strikeouts and divided by ALL games to get the average per decade*/
+/*to find avg strikeouts I divided sum of strikeouts by sum of games. In teams table, strikeouts and games are represented per team. I totaled ALL strikeouts and divided by ALL games to get the average per decade
 
+For homeruns i created a CTE that is functionally the same as the subquery.*/
+                  
 
