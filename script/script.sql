@@ -48,7 +48,6 @@ ORDER BY major_league_salary DESC;
 /*4. Using the fielding table, group players into three groups based on their position: label players with position OF as "Outfield", those with position "SS", "1B", "2B", and "3B" as "Infield", and those with position "P" or "C" as "Battery". Determine the number of putouts made by each of these three groups in 2016.*/
 
 SELECT
-    --CONCAT(namelast, ', ', namefirst) AS player_name,
     CASE WHEN pos = 'SS' OR pos = '1B' OR pos = '2B' OR pos = '3B' THEN 'Infield'
          WHEN pos = 'P' OR pos = 'C' THEN 'Battery'
          ELSE 'Outfield'
@@ -57,8 +56,32 @@ SELECT
 FROM people AS p
 LEFT JOIN fielding AS f
     ON p.playerid = f.playerid
+WHERE f.yearid = 2016
 GROUP BY position;
 
---ANSWER-- Battery= 2,575,499, Infield = 6,101,378, Outfiled = 2,731,506
+--ANSWER-- Battery= 41,424, Infield = 58,934, Outfield = 29,560
    
-    
+   
+--5. Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any 
+--trends?
+
+SELECT
+    CASE WHEN sq.decade = 2010 THEN CONCAT(sq.decade, '-', sq.decade+6)
+        ELSE CONCAT(sq.decade, '-', sq.decade+9) END AS decade,
+    ROUND(AVG(avg_strikeouts), 2) AS avg_strikeouts
+FROM(
+        SELECT
+            CAST(SUM(so) AS DECIMAL)/CAST(SUM(g) AS DECIMAL) AS avg_strikeouts,
+            (yearid/10)*10 AS decade,
+            g/2 AS num_games,
+            COUNT(teamid) AS team
+        FROM teams
+        WHERE ((yearid/10)*10) >= 1920
+        GROUP BY decade, num_games
+    ) AS sq
+GROUP BY decade
+ORDER BY decade;
+
+/*to find avg strikeouts I divided sum of strikeouts by sum of games. In teams table, strikeouts and games are represented per team. I totaled ALL strikeouts and divided by ALL games to get the average per decade*/
+
+
