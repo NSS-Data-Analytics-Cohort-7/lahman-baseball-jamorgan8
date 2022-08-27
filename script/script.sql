@@ -98,12 +98,42 @@ For homeruns i created a CTE that is functionally the same as the subquery.*/
 SELECT
     CASE WHEN (yearid/10)*10 = 2010 THEN CONCAT((yearid/10)*10, '-', ((yearid/10)*10)+6)
         ELSE CONCAT((yearid/10)*10, '-', ((yearid/10)*10)+9) END AS decade,
-    ROUND(CAST(SUM(so) AS DECIMAL)/CAST(SUM(g) AS DECIMAL), 2) AS avg_strikeouts,
-    ROUND(CAST(SUM(hr) AS DECIMAL)/CAST(SUM(g) AS DECIMAL), 2) AS avg_homeruns
+    ROUND(CAST(SUM(so) AS DECIMAL)/CAST(SUM(g)/2 AS DECIMAL), 2) AS avg_strikeouts,
+    ROUND(CAST(SUM(hr) AS DECIMAL)/CAST(SUM(g)/2 AS DECIMAL), 2) AS avg_homeruns
 FROM teams
 WHERE ((yearid/10)*10) >= 1920
 GROUP BY decade
 ORDER BY decade;
 
 --then i realized I could have done it all in one streamlined query...
+
+
+--6. Find the player who had the most success stealing bases in 2016, where success is measured as the percentage of stolen base attempts which are successful. (A stolen base 
+--attempt results either in a stolen base or being caught stealing.) Consider only players who attempted at least 20 stolen bases.
+
+
+WITH steals AS 
+            (SELECT
+                playerid,
+                SUM(sb)/CAST((SUM(sb)+SUM(cs)) AS NUMERIC) AS perc_steals
+            FROM batting
+            WHERE sb IS NOT NULL
+                AND cs IS NOT NULL
+                AND yearid = 2016
+            GROUP BY playerid
+            HAVING SUM(sb) + SUM(cs) >= 20
+            ORDER BY perc_steals DESC)
+
+SELECT
+    CONCAT(namelast, ', ', namefirst) AS player_name,
+    ROUND(perc_steals, 3) AS steal_perc
+FROM people AS p
+JOIN steals AS s
+    ON p.playerid = s.playerid
+ORDER BY steal_perc DESC;
+
+--ANSWER-- Chris Owings, .913
+
+
+
 
