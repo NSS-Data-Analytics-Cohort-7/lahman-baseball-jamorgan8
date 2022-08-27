@@ -108,6 +108,7 @@ ORDER BY decade;
 --then i realized I could have done it all in one streamlined query...
 
 
+
 --6. Find the player who had the most success stealing bases in 2016, where success is measured as the percentage of stolen base attempts which are successful. (A stolen base 
 --attempt results either in a stolen base or being caught stealing.) Consider only players who attempted at least 20 stolen bases.
 
@@ -133,6 +134,85 @@ JOIN steals AS s
 ORDER BY steal_perc DESC;
 
 --ANSWER-- Chris Owings, .913
+
+-- 7.From 1970 – 2016, what is the largest number of wins for a team that did not win the world series? What is the smallest number of wins for a team that did win the world 
+--series? Doing this will probably result in an unusually small number of wins for a world series champion – determine why this is the case. Then redo your query, excluding the --problem year. How often from 1970 – 2016 was it the case that a team with the most wins also won the world series? What percentage of the time?
+
+
+--most wins without winning world series
+SELECT 
+    yearid,
+    teamid,
+    w AS wins,
+    wswin AS world_series_win
+FROM teams
+WHERE yearid BETWEEN 1970 AND 2016
+    AND wswin = 'N'
+ORDER BY wins DESC;
+
+--least wins and winning world series
+SELECT 
+    yearid,
+    teamid,
+    w AS wins,
+    wswin AS world_series_win
+FROM teams
+WHERE yearid BETWEEN 1970 AND 2016
+    AND wswin = 'Y'
+ORDER BY wins;
+
+--Query to find teams that had the most wins AND won WS           
+SELECT
+    t.yearid,
+    name,
+    max_wins,
+    wswin
+FROM teams AS t
+INNER JOIN
+    (SELECT
+        yearid,
+        MAX(w) AS max_wins
+     FROM teams
+     GROUP BY yearid) AS sq
+ON t.yearid = sq.yearid
+GROUP BY t.yearid, max_wins, t.w, wswin, name
+HAVING t.w = max_wins
+    AND t.yearid <> 1981
+    AND t.yearid BETWEEN 1970 AND 2016
+    AND wswin = 'Y';
+
+
+
+
+--ANSWER-- Seattle Mariners had 116 wins, but didn't win the World Series in 2001 . LA Dodgers has 63 wins and won the World Series in 1981. The small number of games was due to a players strike. Only 103-111 official games were played that year
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
