@@ -183,29 +183,70 @@ HAVING t.w = max_wins
 ORDER BY yearid;
 
 
+WITH most_wins AS 
+               (SELECT
+                    t.yearid,
+                    name,
+                    t.w AS num_wins,
+                    wswin AS world_series_win
+                FROM teams AS t
+                INNER JOIN
+                    (SELECT --most wins per year, join to teams table
+                        yearid,
+                        MAX(w) AS max_wins
+                     FROM teams
+                     GROUP BY yearid) AS sq
+                ON t.yearid = sq.yearid
+                GROUP BY t.yearid, max_wins, t.w, wswin, name
+                HAVING t.w = max_wins
+                    AND t.yearid <> 1981
+                    AND t.yearid BETWEEN 1970 AND 2016
+                    AND wswin = 'Y'
+                ORDER BY yearid)
+
 SELECT
-    (12.0/CAST(COUNT(*) AS NUMERIC)) AS perc_wins
+    100*(47/(COUNT(mw.*)/2))::FLOAT AS perc_wins 
 FROM teams AS t
 LEFT JOIN most_wins AS mw
-    ON mw.yearid = t.yearid;
+    ON mw.yearid = t.yearid; -- got stuck and moved on
 
 
 --ANSWER-- Seattle Mariners had 116 wins, but didn't win the World Series in 2001 . LA Dodgers has 63 wins and won the World Series in 1981. The small number of games was due to a players strike. Only 103-111 official games were played that year
 
 
 
+--8. Using the attendance figures from the homegames table, find the teams and parks which had the top 5 average attendance per game in 2016 (where average attendance is defined --as total attendance divided by number of games). Only consider parks where there were at least 10 games played. Report the park name, team name, and average attendance. Repeat --for the lowest 5 average attendance.
 
 
+SELECT
+    team,
+    p.park_name,
+    attendance/games AS avg_attendance
+FROM homegames AS h
+LEFT JOIN parks AS p
+    ON h.park = p.park
+WHERE year = 2016
+    AND games >= 10
+ORDER BY avg_attendance;
 
-select
-    5*5 AS result
+
+--ANSWER--
+/*HIGHEST
+"LAN"	"Dodger Stadium"	45719
+"SLN"	"Busch Stadium III"	42524
+"TOR"	"Rogers Centre"	41877
+"SFN"	"AT&T Park"	41546
+"CHN"	"Wrigley Field"	39906
+
+LOWEST
+"TBA"	"Tropicana Field"	15878
+"OAK"	"Oakland-Alameda County Coliseum"	18784
+"CLE"	"Progressive Field"	19650
+"MIA"	"Marlins Park"	21405
+"CHA"	"U.S. Cellular Field"	21559 */
 
 
-
-
-
-
-
+ 
 
 
 
