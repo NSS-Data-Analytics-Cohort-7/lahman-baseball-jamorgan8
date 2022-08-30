@@ -165,11 +165,11 @@ ORDER BY wins;
 SELECT
     t.yearid,
     name,
-    max_wins,
-    wswin
+    t.w AS num_wins,
+    wswin AS world_series_win
 FROM teams AS t
 INNER JOIN
-    (SELECT
+    (SELECT --most wins per year, join to teams table
         yearid,
         MAX(w) AS max_wins
      FROM teams
@@ -179,9 +179,15 @@ GROUP BY t.yearid, max_wins, t.w, wswin, name
 HAVING t.w = max_wins
     AND t.yearid <> 1981
     AND t.yearid BETWEEN 1970 AND 2016
-    AND wswin = 'Y';
+    AND wswin = 'Y'
+ORDER BY yearid;
 
 
+SELECT
+    (12.0/CAST(COUNT(*) AS NUMERIC)) AS perc_wins
+FROM teams AS t
+LEFT JOIN most_wins AS mw
+    ON mw.yearid = t.yearid;
 
 
 --ANSWER-- Seattle Mariners had 116 wins, but didn't win the World Series in 2001 . LA Dodgers has 63 wins and won the World Series in 1981. The small number of games was due to a players strike. Only 103-111 official games were played that year
@@ -191,7 +197,8 @@ HAVING t.w = max_wins
 
 
 
-
+select
+    5*5 AS result
 
 
 
