@@ -246,13 +246,49 @@ LOWEST
 "CHA"	"U.S. Cellular Field"	21559 */
 
 
- 
+--9. Which managers have won the TSN Manager of the Year award in both the National League (NL) and the American League (AL)? Give their full name and the teams that they were
+--managing when they won the award.
 
 
+WITH nl AS
+        (SELECT 
+            a.playerid,
+            COUNT(a.lgid),
+            a.awardid,
+            m.teamid
+        FROM awardsmanagers AS a
+        JOIN managers AS m
+            ON a.yearid = m.yearid AND a.playerid = m.playerid
+        WHERE a.awardid LIKE 'TSN%'
+            AND a.lgid = 'NL'
+        GROUP BY a.playerid, a.lgid, a.awardid, m.teamid),
+    
+    al AS
+        (SELECT 
+            a.playerid,
+            COUNT(a.lgid),
+            a.awardid,
+            m.teamid
+        FROM awardsmanagers AS a
+        JOIN managers AS m
+            ON a.yearid = m.yearid AND a.playerid = m.playerid
+        WHERE a.awardid LIKE 'TSN%'
+            AND a.lgid = 'AL'
+        GROUP BY a.playerid, a.lgid, a.awardid, m.teamid)
+SELECT
+    namelast || ', ' || namefirst AS name,
+    al.teamid || '/' || nl.teamid AS teams
+FROM people AS p
+JOIN nl
+    ON p.playerid = nl.playerid
+LEFT JOIN al
+    ON p.playerid = al.playerid
+WHERE nl.playerid = al.playerid
+GROUP BY name, al.teamid, nl.teamid;
 
-
-
-
+--ANSWER--
+/*"Johnson, Davey"	"BAL/WAS"
+"Leyland, Jim"	"DET/PIT"*/
 
 
 
