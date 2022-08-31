@@ -291,7 +291,42 @@ GROUP BY name, al.teamid, nl.teamid;
 "Leyland, Jim"	"DET/PIT"*/
 
 
+--10. Find all players who hit their career highest number of home runs in 2016. Consider only players who have played in the league for at least 10 years, and who hit at least --one home run in 2016. Report the players' first and last names and the number of home runs they hit in 2016.
 
+WITH max_homers AS 
+               (SELECT
+                    playerid,
+                    MAX(hr) AS career_highest
+                FROM batting
+                GROUP BY playerid
+                ORDER BY career_highest DESC)
+
+SELECT
+    p.namelast || ', ' || p.namefirst AS name,
+    SUM(hr) AS homeruns
+FROM batting AS b
+LEFT JOIN people AS p
+    ON b.playerid = p.playerid
+JOIN max_homers AS m
+    ON b.playerid = m.playerid
+WHERE hr >= 1
+    AND yearid = 2016
+    AND debut :: DATE <= '2006-12-31'
+    AND b.hr = m.career_highest
+GROUP BY name, hr
+ORDER BY homeruns DESC;
+
+--ANSWER--
+/*
+"Encarnacion, Edwin"	42
+"Cano, Robinson"	39
+"Napoli, Mike"	34
+"Davis, Rajai"	12
+"Pagan, Angel"	12
+"Wainwright, Adam"	2
+"Liriano, Francisco"	1
+"Colon, Bartolo"	1
+*/
 
 
 
