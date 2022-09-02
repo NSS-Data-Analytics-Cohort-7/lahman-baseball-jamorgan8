@@ -303,13 +303,13 @@ WITH max_homers AS
 
 SELECT
     p.namelast || ', ' || p.namefirst AS name,
-    SUM(hr) AS homeruns
+    SUM(b.hr) AS homeruns
 FROM batting AS b
 LEFT JOIN people AS p
     ON b.playerid = p.playerid
 JOIN max_homers AS m
     ON b.playerid = m.playerid
-WHERE hr >= 1
+WHERE b.hr >= 1
     AND yearid = 2016
     AND debut :: DATE <= '2006-12-31'
     AND b.hr = m.career_highest
@@ -386,4 +386,35 @@ ORDER BY yearid;
 2014	"$3,192,317,623.00"
 2015	"$3,514,142,569.00"
 2016	"$3,750,137,392.00" */
+
+
+
+--12. In this question, you will explore the connection between number of wins and attendance.
+--  a. Does there appear to be any correlation between attendance at home games and number of wins?
+
+SELECT teamid,
+       SUM(w) AS wins,
+       attendance
+FROM   teams AS t
+WHERE attendance IS NOT NULL
+    AND yearid = 2016
+GROUP BY teamid, attendance
+ORDER BY attendance DESC;
+
+--Fewer wins generally leads to lower attendance
+
+
+--  b. Do teams that win the world series see a boost in attendance the following year? What about teams that made the playoffs? Making the playoffs means either being a 
+--     division winner or a wild card winner.
+
+
+
+
+
+
+
+
+
+
+
 
