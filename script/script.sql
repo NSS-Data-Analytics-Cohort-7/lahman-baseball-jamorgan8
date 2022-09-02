@@ -205,10 +205,10 @@ WITH most_wins AS
                 ORDER BY yearid)
 
 SELECT
-    100*(47/(COUNT(mw.*)/2))::FLOAT AS perc_wins 
-FROM teams AS t
-LEFT JOIN most_wins AS mw
-    ON mw.yearid = t.yearid; -- got stuck and moved on
+   ROUND(100*COUNT(mw.yearid)::NUMERIC/(SELECT COUNT(DISTINCT yearid) 
+                                          FROM teams
+                                         WHERE yearid BETWEEN 1970 AND 2016), 2) AS perc_wins 
+FROM most_wins AS mw;
 
 
 --ANSWER-- Seattle Mariners had 116 wins, but didn't win the World Series in 2001 . LA Dodgers has 63 wins and won the World Series in 1981. The small number of games was due to a players strike. Only 103-111 official games were played that year
@@ -313,7 +313,7 @@ WHERE hr >= 1
     AND yearid = 2016
     AND debut :: DATE <= '2006-12-31'
     AND b.hr = m.career_highest
-GROUP BY name, hr
+GROUP BY name
 ORDER BY homeruns DESC;
 
 --ANSWER--
