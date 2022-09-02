@@ -329,10 +329,61 @@ ORDER BY homeruns DESC;
 */
 
 
+--11. Is there any correlation between number of wins and team salary? Use data from 2000 and later to answer this question. As you do this analysis, keep in mind that salaries --across the whole league tend to increase together, so you may want to look on a year-by-year basis.
+
+--Query to look at team salaries
+WITH salaries_2000 AS (SELECT yearid, teamid, SUM(salary)::NUMERIC::MONEY AS team_salary -- CTE to calculate total team salary (combined player salaries)
+                         FROM salaries
+                        GROUP BY yearid, teamid
+                        ORDER BY yearid)
+SELECT s.yearid,
+       s.teamid,
+       team_salary,
+       w AS wins
+FROM   salaries_2000 AS s
+LEFT JOIN teams AS t
+    ON s.yearid = t.yearid
+     AND s.teamid = t.teamid
+WHERE  s.yearid >= 2000
+    AND s.teamid = 'MIN'
+GROUP BY s.teamid, s.yearid, team_salary, wins
+ORDER BY yearid, team_salary;
+
+--team salary does appear to be loosely tied to wins. Teams with a generally consistent record tend to show and upwards curve where teams with an inconsistent record tend to --have ups in downs in salary that is loosely tied to their wins
+
+ 
+--this query totales overal league salary by year 
+WITH salaries_2000 AS (SELECT yearid, teamid, SUM(salary)::NUMERIC::MONEY AS team_salary 
+                         FROM salaries
+                        GROUP BY yearid, teamid
+                        ORDER BY yearid)
+SELECT s.yearid,
+       SUM(team_salary)
+FROM   salaries_2000 AS s
+LEFT JOIN teams AS t
+  ON s.yearid = t.yearid
+  AND s.teamid = t.teamid
+WHERE  s.yearid >= 2000
+GROUP BY s.yearid
+ORDER BY yearid;
 
 
-
-
-
-
+/* Year by year the league salary trends upwards. The total league salary has more than doubled since 2000
+2000	"$1,666,135,102.00"
+2001	"$1,960,663,313.00"
+2002	"$2,024,077,522.00"
+2003	"$2,128,262,128.00"
+2004	"$2,070,665,943.00"
+2005	"$2,188,713,398.00"
+2006	"$2,321,472,617.00"
+2007	"$2,476,688,987.00"
+2008	"$2,684,858,670.00"
+2009	"$2,664,726,994.00"
+2010	"$2,721,359,865.00"
+2011	"$2,784,505,291.00"
+2012	"$2,932,741,192.00"
+2013	"$3,034,525,648.00"
+2014	"$3,192,317,623.00"
+2015	"$3,514,142,569.00"
+2016	"$3,750,137,392.00" */
 
