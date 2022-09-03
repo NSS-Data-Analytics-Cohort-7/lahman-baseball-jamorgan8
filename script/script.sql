@@ -21,7 +21,8 @@ LEFT JOIN teams AS t
     ON a.teamid = t.teamid
 WHERE height IS NOT NULL
 GROUP BY CONCAT(namelast, ', ', namefirst), g_all, height, team_name
-ORDER BY height;
+ORDER BY height
+LIMIT 1;
 
 --Answer-- Eddie Gaedel, 43" tall, 1 appearance with St Louis Browns
 
@@ -31,7 +32,7 @@ ORDER BY height;
              
 SELECT
     CONCAT(namelast, ', ', namefirst) AS name,
-    CAST(CAST(SUM(salary) AS NUMERIC) AS MONEY) AS major_league_salary
+    CAST(CAST(SUM(DISTINCT salary) AS NUMERIC) AS MONEY) AS major_league_salary
 FROM collegeplaying AS c
 LEFT JOIN people AS p
     ON c.playerid = p.playerid
@@ -217,17 +218,31 @@ FROM most_wins AS mw;
 
 --8. Using the attendance figures from the homegames table, find the teams and parks which had the top 5 average attendance per game in 2016 (where average attendance is defined --as total attendance divided by number of games). Only consider parks where there were at least 10 games played. Report the park name, team name, and average attendance. Repeat --for the lowest 5 average attendance.
 
-
+--lowest
 SELECT
-    team,
-    p.park_name,
-    attendance/games AS avg_attendance
+	team,
+	p.park_name,
+	attendance/games AS avg_attendance
 FROM homegames AS h
 LEFT JOIN parks AS p
-    ON h.park = p.park
+	ON h.park = p.park
 WHERE year = 2016
-    AND games >= 10
-ORDER BY avg_attendance;
+	AND games >= 10
+ORDER BY avg_attendance
+LIMIT 5;
+
+--highest
+SELECT
+	team,
+	p.park_name,
+	attendance/games AS avg_attendance
+FROM homegames AS h
+LEFT JOIN parks AS p
+	ON h.park = p.park
+WHERE year = 2016
+	AND games >= 10
+ORDER BY avg_attendance DESC
+LIMIT 5;
 
 
 --ANSWER--
@@ -281,7 +296,7 @@ SELECT
 FROM people AS p
 JOIN nl
     ON p.playerid = nl.playerid
-LEFT JOIN al
+JOIN al
     ON p.playerid = al.playerid
 WHERE nl.playerid = al.playerid
 GROUP BY name, al.teamid, nl.teamid;
